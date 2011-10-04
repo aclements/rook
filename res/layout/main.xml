@@ -3,11 +3,12 @@
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:background="#FFFFFF"
     >
-<TextView
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:text="Hello World, RookReaderActivity"
-    />
+  <edu.mit.csail.awakening.rook.PageView
+      android:id="@+id/page"
+      android:layout_width="fill_parent"
+      android:layout_height="fill_parent"
+      />
 </LinearLayout>
 
