@@ -14,9 +14,13 @@ class RookFile
     private final ZipFile zip;
     private final List<ZipEntry> pages;
 
+    public final String path;
+
     public RookFile(String path)
         throws IOException
     {
+        this.path = path;
+
         // XXX See android.os.Environment for how to find files
         zip = new ZipFile(path);
 

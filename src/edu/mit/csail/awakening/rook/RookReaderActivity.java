@@ -3,6 +3,7 @@ package edu.mit.csail.awakening.rook;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,15 +16,17 @@ import java.io.IOException;
 
 public class RookReaderActivity extends Activity
 {
-    private static final int REQUEST_CODE_PICKED_FILE = 1;
+    private static final int REQUEST_CODE_PICK_FILE = 1;
 
     private static final int MENU_OPEN_ID = Menu.FIRST;
 
     private RookFile file;
 
+    private SharedPreferences prefs;
+
     /** Called when the activity is first created. */
     @Override
-    public void onCreate(Bundle savedInstanceState)
+    protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
 
@@ -31,9 +34,31 @@ public class RookReaderActivity extends Activity
 
         setContentView(R.layout.main);
 
-        // XXX I think this can result in an endless loop of starting
-        // the open file, then restarting this activity
-        startOpenFile();
+        // XXX Put file in saved bundle (maybe position, but that
+        // should be in the DB anyway).  Maybe call startOpenFile if
+        // there is no file in the bundle?
+
+        // XXX Offer to open immediately if there's no saved path or
+        // it can't be opened
+
+        prefs = getPreferences(MODE_WORLD_READABLE);
+        String path = prefs.getString("path", null);
+        if (path != null)
+            openFile(path);
+    }
+
+    @Override
+    protected void onPause()
+    {
+        super.onPause();
+
+        SharedPreferences.Editor ed = prefs.edit();
+        if (file != null) {
+            ed.putString("path", file.path);
+        } else {
+            ed.remove("path");
+        }
+        ed.commit();
     }
 
     @Override
@@ -63,7 +88,7 @@ public class RookReaderActivity extends Activity
         intent.putExtra("org.openintents.extra.BUTTON_TEXT", "Open");
 
         try {
-            startActivityForResult(intent, REQUEST_CODE_PICKED_FILE);
+            startActivityForResult(intent, REQUEST_CODE_PICK_FILE);
         } catch (ActivityNotFoundException e) {
             // No compatible file manager was found.
             Toast.makeText(this, "No file manager installed",
@@ -76,7 +101,7 @@ public class RookReaderActivity extends Activity
         super.onActivityResult(requestCode, resultCode, data);
 
         switch (requestCode) {
-        case REQUEST_CODE_PICKED_FILE:
+        case REQUEST_CODE_PICK_FILE:
             if (resultCode == RESULT_OK && data != null) {
                 Uri fileUri = data.getData();
                 if (fileUri != null) {
