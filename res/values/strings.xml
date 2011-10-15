@@ -2,4 +2,5 @@
 <resources>
   <string name="app_name">Rook Reader</string>
   <string name="menu_open">Open</string>
+  <string name="menu_thumbnails">Thumbnails</string>
 </resources>

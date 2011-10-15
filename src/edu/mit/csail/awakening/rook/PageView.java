@@ -37,6 +37,11 @@ public class PageView extends View
         setPage(p, false);
     }
 
+    public int getPage()
+    {
+        return page;
+    }
+
     private void setPage(int p, boolean bottom)
     {
         int max = file.getNumPages();
