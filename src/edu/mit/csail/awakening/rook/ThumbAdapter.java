@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import java.io.IOException;
 
 public class ThumbAdapter extends BaseAdapter
@@ -46,15 +47,15 @@ public class ThumbAdapter extends BaseAdapter
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        // XXX Draw a border around the image
         // XXX Put a page number under the image
-        ImageView imageView;
+        View view;
         if (convertView == null) {
-            imageView = (ImageView)inflater.inflate(R.layout.thumb, parent, false);
-            imageView.setLayoutParams(new GridView.LayoutParams(width, height));
+            view = inflater.inflate(R.layout.thumb, parent, false);
+            view.setLayoutParams(new GridView.LayoutParams(width, height));
         } else {
-            imageView = (ImageView) convertView;
+            view = convertView;
         }
+        ImageView imageView = (ImageView)view.findViewById(R.id.image);
 
         try {
             // XXX Scaling should be generic and cached.  Maybe it
@@ -75,6 +76,6 @@ public class ThumbAdapter extends BaseAdapter
         } catch (IOException e) {
             // XXX
         }
-        return imageView;
+        return view;
     }
 }
