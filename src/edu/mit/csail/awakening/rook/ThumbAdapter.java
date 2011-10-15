@@ -9,6 +9,7 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import java.io.IOException;
 
 public class ThumbAdapter extends BaseAdapter
@@ -47,15 +48,16 @@ public class ThumbAdapter extends BaseAdapter
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        // XXX Put a page number under the image
         View view;
         if (convertView == null) {
             view = inflater.inflate(R.layout.thumb, parent, false);
-            view.setLayoutParams(new GridView.LayoutParams(width, height));
         } else {
             view = convertView;
         }
         ImageView imageView = (ImageView)view.findViewById(R.id.image);
+        TextView labelView = (TextView)view.findViewById(R.id.label);
+
+        labelView.setText(file.getPageLabel(position));
 
         try {
             // XXX Scaling should be generic and cached.  Maybe it
