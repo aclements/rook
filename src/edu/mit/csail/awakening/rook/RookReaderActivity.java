@@ -5,17 +5,23 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.Toast;
+import android.widget.ViewAnimator;
 
 import java.io.IOException;
 
 public class RookReaderActivity extends Activity
 {
+    private static final String TAG = "RookReaderActivity";
+
     private static final int REQUEST_CODE_PICK_FILE = 1;
 
     private static final int MENU_OPEN_ID = Menu.FIRST;
@@ -23,6 +29,10 @@ public class RookReaderActivity extends Activity
     private RookFile file;
 
     private SharedPreferences prefs;
+
+    private ViewAnimator views;
+    private PageView page;
+    private GridView thumbs;
 
     /** Called when the activity is first created. */
     @Override
@@ -33,6 +43,11 @@ public class RookReaderActivity extends Activity
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
         setContentView(R.layout.main);
+        views = (ViewAnimator)findViewById(R.id.views);
+        page = (PageView)findViewById(R.id.page);
+        thumbs = (GridView)findViewById(R.id.thumbs);
+
+        views.setDisplayedChild(1);
 
         // XXX Put file in saved bundle (maybe position, but that
         // should be in the DB anyway).  Maybe call startOpenFile if
@@ -119,11 +134,26 @@ public class RookReaderActivity extends Activity
     {
         try {
             file = new RookFile(path);
-            //((ImageView)findViewById(R.id.img)).setImageBitmap(file.getPage(0));
-            ((PageView)findViewById(R.id.page)).setFile(file);
         } catch (IOException e) {
             Toast.makeText(this, "Failed to open: " + e,
                            Toast.LENGTH_SHORT).show();
+            return;
         }
+        //((ImageView)findViewById(R.id.img)).setImageBitmap(file.getPage(0));
+        page.setFile(file);
+        // XXX Use g.setSelection to jump view to an item
+        Resources res = getResources();
+        float bound = res.getDimension(R.dimen.thumb_bound);
+        // XXX Use the common aspect ratio of this file.
+        float pageWidth = 8.5f, pageHeight = 11;
+        int thumbWidth = (int)bound, thumbHeight = (int)bound;
+        if (pageWidth > pageHeight) {
+            thumbHeight = (int)(pageHeight * thumbWidth / pageWidth);
+        } else {
+            thumbWidth = (int)(pageWidth * thumbHeight / pageHeight);
+        }
+        Log.d(TAG, "thumbWidth " + thumbWidth + " thumbHeight " + thumbHeight);
+        thumbs.setColumnWidth(thumbWidth);
+        thumbs.setAdapter(new ThumbAdapter(this, file, thumbWidth, thumbHeight));
     }
 }
