@@ -154,6 +154,8 @@ public class RookReaderActivity extends Activity
         }
         Log.d(TAG, "thumbWidth " + thumbWidth + " thumbHeight " + thumbHeight);
         thumbs.setColumnWidth(thumbWidth);
-        thumbs.setAdapter(new ThumbAdapter(this, file, thumbWidth, thumbHeight));
+        ThumbAdapter ta = new ThumbAdapter(this, file, thumbWidth, thumbHeight);
+        thumbs.setAdapter(ta);
+        thumbs.setRecyclerListener(ta);
     }
 }

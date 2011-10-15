@@ -2,9 +2,11 @@ package edu.mit.csail.awakening.rook;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -12,8 +14,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import java.io.IOException;
 
-public class ThumbAdapter extends BaseAdapter
+public class ThumbAdapter extends BaseAdapter implements AbsListView.RecyclerListener
 {
+    private static final String TAG = "ThumbAdapter";
+
     private final Context context;
     private final LayoutInflater inflater;
     private final RookFile file;
@@ -48,6 +52,8 @@ public class ThumbAdapter extends BaseAdapter
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        Log.d(TAG, "Getting view for " + position + " (converting " + convertView + ")");
+
         View view;
         if (convertView == null) {
             view = inflater.inflate(R.layout.thumb, parent, false);
@@ -63,6 +69,7 @@ public class ThumbAdapter extends BaseAdapter
             // XXX Scaling should be generic and cached.  Maybe it
             // should be part of RookFile, since the format might be
             // able to provide scaled images another way.
+            // XXX Resizing should be done in a background thread
             Bitmap page = file.getPage(position);
             // XXX Aspect ratio
             int w = width, h = height;
@@ -79,5 +86,16 @@ public class ThumbAdapter extends BaseAdapter
             // XXX
         }
         return view;
+    }
+
+    @Override
+    public void onMovedToScrapHeap(View view) 
+    {
+        Log.d(TAG, "Scrapping " + view);
+
+        // We're going to replace the bitmap in this view, so there's
+        // no point in keeping it around on the scrap heap.
+        ImageView imageView = (ImageView)view.findViewById(R.id.image);
+        imageView.setImageBitmap(null);
     }
 }
