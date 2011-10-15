@@ -2,6 +2,7 @@ package edu.mit.csail.awakening.rook;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -12,12 +13,14 @@ import java.io.IOException;
 public class ThumbAdapter extends BaseAdapter
 {
     private final Context context;
+    private final LayoutInflater inflater;
     private final RookFile file;
     private final int width, height;
 
     public ThumbAdapter(Context context, RookFile file, int width, int height)
     {
         this.context = context;
+        this.inflater = LayoutInflater.from(context);
         this.file = file;
         this.width = width;
         this.height = height;
@@ -47,10 +50,8 @@ public class ThumbAdapter extends BaseAdapter
         // XXX Put a page number under the image
         ImageView imageView;
         if (convertView == null) {
-            imageView = new ImageView(context);
+            imageView = (ImageView)inflater.inflate(R.layout.thumb, parent, false);
             imageView.setLayoutParams(new GridView.LayoutParams(width, height));
-            imageView.setAdjustViewBounds(false);
-            //            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
         } else {
             imageView = (ImageView) convertView;
         }
