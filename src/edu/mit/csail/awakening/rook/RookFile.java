@@ -53,7 +53,14 @@ class RookFile
         // It depends how expensive this is.  See also
         // BitmapFactory.Options for how to make bitmaps purgable,
         // which would essentially let the system handle caching.
+        // Probably also want to create images with a smaller
+        // inPreferredConfig.
         InputStream is = zip.getInputStream(pages.get(n));
         return BitmapFactory.decodeStream(is);
+    }
+
+    public String getPageLabel(int n)
+    {
+        return "" + (n+1);
     }
 }
