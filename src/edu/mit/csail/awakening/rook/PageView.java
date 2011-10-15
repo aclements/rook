@@ -32,7 +32,7 @@ public class PageView extends View
         setPage(0);
     }
 
-    private void setPage(int p)
+    public void setPage(int p)
     {
         setPage(p, false);
     }

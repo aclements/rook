@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -23,6 +24,8 @@ public class ThumbAdapter extends BaseAdapter implements AbsListView.RecyclerLis
     private final RookFile file;
     private final int width, height;
 
+    private final TouchListener touchListener;
+
     public ThumbAdapter(Context context, RookFile file, int width, int height)
     {
         this.context = context;
@@ -30,7 +33,13 @@ public class ThumbAdapter extends BaseAdapter implements AbsListView.RecyclerLis
         this.file = file;
         this.width = width;
         this.height = height;
+
+        this.touchListener = new TouchListener();
     }
+
+    /*
+     * View adapter
+     */
 
     @Override
     public int getCount()
@@ -85,8 +94,16 @@ public class ThumbAdapter extends BaseAdapter implements AbsListView.RecyclerLis
         } catch (IOException e) {
             // XXX
         }
+
+        imageView.setTag(position);
+        imageView.setOnTouchListener(touchListener);
+
         return view;
     }
+
+    /*
+     * Recycle listener
+     */
 
     @Override
     public void onMovedToScrapHeap(View view) 
@@ -97,5 +114,36 @@ public class ThumbAdapter extends BaseAdapter implements AbsListView.RecyclerLis
         // no point in keeping it around on the scrap heap.
         ImageView imageView = (ImageView)view.findViewById(R.id.image);
         imageView.setImageBitmap(null);
+    }
+
+    /*
+     * Touch handling
+     */
+
+    private static class TouchListener implements View.OnTouchListener
+    {
+        OnSelectListener onSelectListener;
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) 
+        {
+            if (onSelectListener == null)
+                return false;
+            if (event.getAction() != MotionEvent.ACTION_DOWN)
+                return false;
+            return onSelectListener.onSelect((Integer)v.getTag(),
+                                             event.getX() / v.getWidth(),
+                                             event.getY() / v.getHeight());
+        }
+    }
+
+    public interface OnSelectListener
+    {
+        boolean onSelect(int page, float x, float y);
+    }
+
+    public void setOnSelectListener(OnSelectListener l)
+    {
+        touchListener.onSelectListener = l;
     }
 }

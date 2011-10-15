@@ -31,7 +31,7 @@ public class RookReaderActivity extends Activity
     private SharedPreferences prefs;
 
     private ViewAnimator views;
-    private PageView page;
+    private PageView pageView;
     private GridView thumbs;
 
     /** Called when the activity is first created. */
@@ -44,7 +44,7 @@ public class RookReaderActivity extends Activity
 
         setContentView(R.layout.main);
         views = (ViewAnimator)findViewById(R.id.views);
-        page = (PageView)findViewById(R.id.page);
+        pageView = (PageView)findViewById(R.id.page);
         thumbs = (GridView)findViewById(R.id.thumbs);
 
         views.setDisplayedChild(1);
@@ -140,7 +140,7 @@ public class RookReaderActivity extends Activity
             return;
         }
         //((ImageView)findViewById(R.id.img)).setImageBitmap(file.getPage(0));
-        page.setFile(file);
+        pageView.setFile(file);
         // XXX Use g.setSelection to jump view to an item
         Resources res = getResources();
         float bound = res.getDimension(R.dimen.thumb_bound);
@@ -157,5 +157,15 @@ public class RookReaderActivity extends Activity
         ThumbAdapter ta = new ThumbAdapter(this, file, thumbWidth, thumbHeight);
         thumbs.setAdapter(ta);
         thumbs.setRecyclerListener(ta);
+        ta.setOnSelectListener(new ThumbAdapter.OnSelectListener() {
+                @Override
+                public boolean onSelect(int page, float x, float y)
+                {
+                    // XXX Handle position
+                    pageView.setPage(page);
+                    views.setDisplayedChild(0);
+                    return true;
+                }
+            });
     }
 }
