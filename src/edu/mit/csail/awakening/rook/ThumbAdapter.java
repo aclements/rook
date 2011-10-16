@@ -64,12 +64,15 @@ public class ThumbAdapter extends BaseAdapter
         Log.d(TAG, "Getting view for " + position + " (converting " + convertView + ")");
 
         View view;
+        ImageView imageView;
         if (convertView == null) {
             view = inflater.inflate(R.layout.thumb, parent, false);
+            imageView = (ImageView)view.findViewById(R.id.image);
+            view.setTag(imageView);
         } else {
             view = convertView;
+            imageView = (ImageView)view.getTag();
         }
-        ImageView imageView = (ImageView)view.findViewById(R.id.image);
         TextView labelView = (TextView)view.findViewById(R.id.label);
 
         labelView.setText(file.getPageLabel(position));
@@ -109,7 +112,7 @@ public class ThumbAdapter extends BaseAdapter
 
         // We're going to replace the bitmap in this view, so there's
         // no point in keeping it around on the scrap heap.
-        ImageView imageView = (ImageView)view.findViewById(R.id.image);
+        ImageView imageView = (ImageView)view.getTag();
         imageView.setImageBitmap(null);
     }
 
@@ -139,8 +142,7 @@ public class ThumbAdapter extends BaseAdapter
         } else {
             // Compute where our recorded touch event lies within the
             // image.
-            // XXX Put the image view in the view's tag
-            ImageView imageView = (ImageView)view.findViewById(R.id.image);
+            ImageView imageView = (ImageView)view.getTag();
             int[] location = new int[2];
             imageView.getLocationOnScreen(location);
             Log.d(TAG, "onItemClick touch " + touchX + "," + touchY +
