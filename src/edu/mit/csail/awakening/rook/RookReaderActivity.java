@@ -163,10 +163,14 @@ public class RookReaderActivity extends Activity
         ThumbAdapter ta = new ThumbAdapter(this, file, thumbWidth, thumbHeight);
         thumbs.setAdapter(ta);
         thumbs.setRecyclerListener(ta);
+        thumbs.setOnTouchListener(ta);
+        thumbs.setOnItemClickListener(ta);
+
         ta.setOnSelectListener(new ThumbAdapter.OnSelectListener() {
                 @Override
                 public boolean onSelect(int page, float x, float y)
                 {
+                    Log.d(TAG, "Select page " + page + " at " + x + "," + y);
                     // XXX Handle position
                     pageView.setPage(page);
                     views.setDisplayedChild(0);

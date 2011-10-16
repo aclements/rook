@@ -17,13 +17,8 @@
     <!-- The page thumbnail grid.  We fill this with instances of the
          thumb layout.  The column width is set at runtime to fit the
          document's aspect ratio in a @dimen/thumb_bound x
-         @dimen/thumb_bound box.  Clicking a cell doesn't do anything
-         (only clicking a thumbnail image) so we disable visual
-         feedback by setting the listSelector to transparent.  Cell
-         spacing is handled in the thumb layout.
-
-         XXX Disabling the list selector makes navigation mode
-         confusing (not that selecting would do anything).
+         @dimen/thumb_bound box.  Cell spacing is handled in the thumb
+         layout.
     -->
     <GridView
         android:id="@+id/thumbs"
@@ -32,8 +27,6 @@
         android:numColumns="auto_fit"
         android:stretchMode="columnWidth"
         android:gravity="center"
-        android:clickable="false"
-        android:listSelector="@android:color/transparent"
 
         android:padding="0dp"
         android:verticalSpacing="0dp"

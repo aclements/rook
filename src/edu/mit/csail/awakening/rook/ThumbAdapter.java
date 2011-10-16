@@ -8,6 +8,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -15,7 +16,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import java.io.IOException;
 
-public class ThumbAdapter extends BaseAdapter implements AbsListView.RecyclerListener
+public class ThumbAdapter extends BaseAdapter
+    implements AbsListView.RecyclerListener,
+               View.OnTouchListener,
+               AdapterView.OnItemClickListener
 {
     private static final String TAG = "ThumbAdapter";
 
@@ -24,8 +28,6 @@ public class ThumbAdapter extends BaseAdapter implements AbsListView.RecyclerLis
     private final RookFile file;
     private final int width, height;
 
-    private final TouchListener touchListener;
-
     public ThumbAdapter(Context context, RookFile file, int width, int height)
     {
         this.context = context;
@@ -33,8 +35,6 @@ public class ThumbAdapter extends BaseAdapter implements AbsListView.RecyclerLis
         this.file = file;
         this.width = width;
         this.height = height;
-
-        this.touchListener = new TouchListener();
     }
 
     /*
@@ -95,9 +95,6 @@ public class ThumbAdapter extends BaseAdapter implements AbsListView.RecyclerLis
             // XXX
         }
 
-        imageView.setTag(position);
-        imageView.setOnTouchListener(touchListener);
-
         return view;
     }
 
@@ -120,20 +117,40 @@ public class ThumbAdapter extends BaseAdapter implements AbsListView.RecyclerLis
      * Touch handling
      */
 
-    private static class TouchListener implements View.OnTouchListener
-    {
-        OnSelectListener onSelectListener;
+    private OnSelectListener onSelectListener;
+    private int touchX, touchY;
 
-        @Override
-        public boolean onTouch(View v, MotionEvent event) 
-        {
-            if (onSelectListener == null)
-                return false;
-            if (event.getAction() != MotionEvent.ACTION_DOWN)
-                return false;
-            return onSelectListener.onSelect((Integer)v.getTag(),
-                                             event.getX() / v.getWidth(),
-                                             event.getY() / v.getHeight());
+    @Override
+    public boolean onTouch(View v, MotionEvent event)
+    {
+        if (event.getAction() == MotionEvent.ACTION_UP) {
+            touchX = (int)event.getRawX();
+            touchY = (int)event.getRawY();
+        }
+        return false;
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        int page = position;
+
+        if (!parent.isInTouchMode()) {
+            onSelectListener.onSelect(page, -1, -1);
+        } else {
+            // Compute where our recorded touch event lies within the
+            // image.
+            // XXX Put the image view in the view's tag
+            ImageView imageView = (ImageView)view.findViewById(R.id.image);
+            int[] location = new int[2];
+            imageView.getLocationOnScreen(location);
+            Log.d(TAG, "onItemClick touch " + touchX + "," + touchY +
+                  " image " + location[0] + "," + location[1] +
+                  " " + imageView.getWidth() + "x" + imageView.getHeight());
+            float x = (float)(touchX - location[0]) / imageView.getWidth(),
+                y = (float)(touchY - location[1]) / imageView.getHeight();
+            x = Math.max(0, Math.min(1, x));
+            y = Math.max(0, Math.min(1, y));
+            onSelectListener.onSelect(page, x, y);
         }
     }
 
@@ -144,6 +161,6 @@ public class ThumbAdapter extends BaseAdapter implements AbsListView.RecyclerLis
 
     public void setOnSelectListener(OnSelectListener l)
     {
-        touchListener.onSelectListener = l;
+        onSelectListener = l;
     }
 }
