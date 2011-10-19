@@ -14,7 +14,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import java.io.IOException;
+import android.widget.Toast;
 
 public class ThumbAdapter extends BaseAdapter
     implements AbsListView.RecyclerListener,
@@ -59,44 +59,64 @@ public class ThumbAdapter extends BaseAdapter
         return position;
     }
 
+    private static class ViewMeta
+    {
+        int page;
+        ImageView imageView;
+        TextView labelView;
+        AsyncRender render;
+    }
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        Log.d(TAG, "Getting view for " + position + " (converting " + convertView + ")");
+        final int page = position;
+        Log.d(TAG, "Getting view for " + page + " (converting " + convertView + ")");
 
         View view;
-        ImageView imageView;
+        final ViewMeta meta;
         if (convertView == null) {
             view = inflater.inflate(R.layout.thumb, parent, false);
-            imageView = (ImageView)view.findViewById(R.id.image);
-            view.setTag(imageView);
+            meta = new ViewMeta();
+            view.setTag(meta);
+            meta.imageView = (ImageView)view.findViewById(R.id.image);
+            meta.labelView = (TextView)view.findViewById(R.id.label);
         } else {
             view = convertView;
-            imageView = (ImageView)view.getTag();
+            meta = (ViewMeta)view.getTag();
+            // Android tends to ask for the same position repeatedly,
+            // passing in the view we just returned (and not
+            // scrapping); avoid redoing our work when this happens.
+            if (meta.page == page) {
+                Log.d(TAG, "Reusing image");
+                return view;
+            }
         }
-        TextView labelView = (TextView)view.findViewById(R.id.label);
 
-        labelView.setText(file.getPage(position).getLabel());
+        meta.page = page;
+        meta.labelView.setText(file.getPage(page).getLabel());
 
-        try {
-            // XXX Scaling should be generic and cached.  Maybe it
-            // should be part of RookFile, since the format might be
-            // able to provide scaled images another way.
-            // XXX Resizing should be done in a background thread
-            Bitmap page = file.getPage(position).render();
-            // XXX Aspect ratio
-            int w = width, h = height;
-            // if (page.getWidth() > page.getHeight()) {
-            //     w = width;
-            //     h = page.getHeight() * w / page.getWidth();
-            // } else {
-            //     h = width;
-            //     w = page.getWidth() * h / page.getHeight();
-            // }
-            Bitmap scaled = page.createScaledBitmap(page, w, h, true);
-            imageView.setImageBitmap(scaled);
-        } catch (IOException e) {
-            // XXX
-        }
+        // Make sure the image view is the right size while we go off
+        // to load the real bitmap
+        // XXX Should be actual page dimensions, once we're honoring
+        // the aspect ratio
+        meta.imageView.setMinimumWidth(width);
+        meta.imageView.setMinimumHeight(height);
+        // XXX The order these load in is really annoying, but maybe
+        // caching will make that irrelevant
+        meta.render = new AsyncRender(file, position, width, height) {
+                protected void onPostExecute(Bitmap result)
+                {
+                    if (result == null)
+                        Toast.makeText(context, "Failed to render page " + page,
+                                       Toast.LENGTH_SHORT).show();
+                    else if (meta.page == page) {
+                        // We check the page in case the view was recycled
+                        meta.imageView.setImageBitmap(result);
+                        meta.render = null;
+                    }
+                }
+            };
+        meta.render.execute();
 
         return view;
     }
@@ -108,12 +128,22 @@ public class ThumbAdapter extends BaseAdapter
     @Override
     public void onMovedToScrapHeap(View view) 
     {
-        Log.d(TAG, "Scrapping " + view);
+        ViewMeta meta = (ViewMeta)view.getTag();
+        Log.d(TAG, "Scrapping page " + meta.page + " (" + view + ")");
+
+        // Mark this view as scrapped.
+        meta.page = -1;
+
+        // Stop the async render
+        if (meta.render != null) {
+            Log.d(TAG, "Stopping async render");
+            meta.render.cancel(true);
+            meta.render = null;
+        }
 
         // We're going to replace the bitmap in this view, so there's
         // no point in keeping it around on the scrap heap.
-        ImageView imageView = (ImageView)view.getTag();
-        imageView.setImageBitmap(null);
+        meta.imageView.setImageBitmap(null);
     }
 
     /*
@@ -142,7 +172,7 @@ public class ThumbAdapter extends BaseAdapter
         } else {
             // Compute where our recorded touch event lies within the
             // image.
-            ImageView imageView = (ImageView)view.getTag();
+            ImageView imageView = ((ViewMeta)view.getTag()).imageView;
             int[] location = new int[2];
             imageView.getLocationOnScreen(location);
             Log.d(TAG, "onItemClick touch " + touchX + "," + touchY +
