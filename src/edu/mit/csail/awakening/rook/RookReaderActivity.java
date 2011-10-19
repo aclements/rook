@@ -35,6 +35,9 @@ public class RookReaderActivity extends Activity
     private PageView pageView;
     private GridView thumbs;
 
+    // XXX Support Nook hardware button navigation, both in page mode
+    // and in thumbnail mode
+
     /** Called when the activity is first created. */
     @Override
     protected void onCreate(Bundle savedInstanceState)

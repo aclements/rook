@@ -75,14 +75,14 @@ public class ThumbAdapter extends BaseAdapter
         }
         TextView labelView = (TextView)view.findViewById(R.id.label);
 
-        labelView.setText(file.getPageLabel(position));
+        labelView.setText(file.getPage(position).getLabel());
 
         try {
             // XXX Scaling should be generic and cached.  Maybe it
             // should be part of RookFile, since the format might be
             // able to provide scaled images another way.
             // XXX Resizing should be done in a background thread
-            Bitmap page = file.getPage(position);
+            Bitmap page = file.getPage(position).render();
             // XXX Aspect ratio
             int w = width, h = height;
             // if (page.getWidth() > page.getHeight()) {
