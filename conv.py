@@ -47,12 +47,16 @@ class PDFInfo(object):
     def getBounds(self):
         for page in self.__xml.findall("page"):
             bound = None
-            for text in page.findall("text"):
-                if text.text and text.text.isdigit():
+            for obj in page:
+                # Note: 'image' objects require poppler-utils 0.20 or
+                # later
+                if obj.tag not in ("text", "image"):
+                    continue
+                if obj.text and obj.text.isdigit():
                     # Lame test to cut off page numbers.  Should check
                     # that it's the sole, bottom-most text, too.
                     continue
-                bounds = Bounds.fromObj(text, page)
+                bounds = Bounds.fromObj(obj, page)
                 if bound:
                     bound |= bounds
                 else:
