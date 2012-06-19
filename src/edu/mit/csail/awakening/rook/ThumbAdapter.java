@@ -72,6 +72,7 @@ public class ThumbAdapter extends BaseAdapter
         final int page = position;
         Log.d(TAG, "Getting view for " + page + " (converting " + convertView + ")");
 
+        // XXX Should this use a PageView instead of an ImageView?
         View view;
         final ViewMeta meta;
         if (convertView == null) {

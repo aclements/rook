@@ -51,6 +51,7 @@ public class RookReaderActivity extends Activity
         pageView = (PageView)findViewById(R.id.page);
         thumbs = (GridView)findViewById(R.id.thumbs);
 
+        // XXX Remember this as part of the display state
         views.setDisplayedChild(1);
 
         // XXX Put file in saved bundle (maybe position, but that
@@ -60,6 +61,7 @@ public class RookReaderActivity extends Activity
         // XXX Offer to open immediately if there's no saved path or
         // it can't be opened
 
+        // XXX Remember the per-file location, too
         prefs = getPreferences(MODE_WORLD_READABLE);
         String path = prefs.getString("path", null);
         if (path != null)
@@ -70,6 +72,8 @@ public class RookReaderActivity extends Activity
     protected void onPause()
     {
         super.onPause();
+
+        N2EpdController.setGL16Mode(2);
 
         SharedPreferences.Editor ed = prefs.edit();
         if (file != null) {

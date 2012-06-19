@@ -22,7 +22,7 @@ public class PageView extends View
 
     public PageView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        //N2EpdController.setGL16Mode(2);
+        N2EpdController.setGL16Mode(2);
     }
 
     public void setFile(RookFile f)
@@ -83,7 +83,8 @@ public class PageView extends View
         Log.d(TAG, "page " + page + " offset " + offset);
         // XXX Stops working if we switch to another activity (e.g.,
         // the screensaver)
-        //N2EpdController.setGL16Mode(0);
+        // XXX This is not the right place for this.  Activity pause/resume?
+        N2EpdController.setGL16Mode(0);
         canvas.drawBitmap(pageImage, 0, -offset, new Paint());
     }
 
