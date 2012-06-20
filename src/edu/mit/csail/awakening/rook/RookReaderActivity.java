@@ -56,13 +56,12 @@ public class RookReaderActivity extends Activity
         // should be in the DB anyway).  Maybe call startOpenFile if
         // there is no file in the bundle?
 
-        // XXX Offer to open immediately if there's no saved path or
-        // it can't be opened
-
         // XXX Remember the per-file location, too
         prefs = getPreferences(MODE_WORLD_READABLE);
         String path = prefs.getString("path", null);
-        if (path != null)
+        if (path == null)
+            startOpenFile();
+        else
             openFile(path);
     }
 
@@ -148,6 +147,7 @@ public class RookReaderActivity extends Activity
         } catch (IOException e) {
             Toast.makeText(this, "Failed to open: " + e,
                            Toast.LENGTH_SHORT).show();
+            startOpenFile();
             return;
         }
         //((ImageView)findViewById(R.id.img)).setImageBitmap(file.getPage(0));
