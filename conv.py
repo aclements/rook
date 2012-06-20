@@ -68,7 +68,7 @@ def pdfToRook(srcPath, outPath):
     # We add a smidgen of top/bottom margin to make it more obvious
     # which frame of a page you're viewing.
     MARGIN = 72/4
-    TEXT_WIDTH = 800
+    TEXT_WIDTH = 800 - 48
 
     outDir = tempfile.mkdtemp()
 
