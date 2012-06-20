@@ -9,6 +9,7 @@ import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.GridView;
@@ -31,9 +32,6 @@ public class RookReaderActivity extends Activity
     private ViewAnimator views;
     private PageView pageView;
     private GridView thumbs;
-
-    // XXX Support Nook hardware button navigation, both in page mode
-    // and in thumbnail mode
 
     /** Called when the activity is first created. */
     @Override
@@ -171,5 +169,24 @@ public class RookReaderActivity extends Activity
                     return true;
                 }
             });
+    }
+
+    private final int KEYCODE_NOOK_LEFT_TOP = 92;
+    private final int KEYCODE_NOOK_LEFT_BOTTOM = 93;
+    private final int KEYCODE_NOOK_RIGHT_TOP = 94;
+    private final int KEYCODE_NOOK_RIGHT_BOTTOM = 95;
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KEYCODE_NOOK_LEFT_TOP ||
+            keyCode == KEYCODE_NOOK_RIGHT_TOP) {
+            pageView.next();
+            return true;
+        } else if (keyCode == KEYCODE_NOOK_LEFT_BOTTOM ||
+                   keyCode == KEYCODE_NOOK_RIGHT_BOTTOM) {
+            pageView.prev();
+            return true;
+        }
+        return false;
     }
 }
