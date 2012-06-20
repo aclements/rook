@@ -9,8 +9,6 @@ import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.GridView;
@@ -25,9 +23,6 @@ public class RookReaderActivity extends Activity
     private static final String TAG = "RookReaderActivity";
 
     private static final int REQUEST_CODE_PICK_FILE = 1;
-
-    private static final int MENU_OPEN_ID = Menu.FIRST;
-    private static final int MENU_THUMBS_ID = MENU_OPEN_ID + 1;
 
     private RookFile file;
 
@@ -96,29 +91,6 @@ public class RookReaderActivity extends Activity
             ed.remove("path");
         }
         ed.commit();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        boolean result = super.onCreateOptionsMenu(menu);
-        menu.add(0, MENU_OPEN_ID, 0, R.string.menu_open);
-        menu.add(0, MENU_THUMBS_ID, 0, R.string.menu_thumbnails);
-        return result;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-        case MENU_OPEN_ID:
-            startOpenFile();
-            return true;
-        case MENU_THUMBS_ID:
-            thumbs.setSelection(pageView.getPage());
-            views.setDisplayedChild(1);
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     private void startOpenFile()
