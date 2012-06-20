@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import java.util.HashMap;
 
 public class ThumbAdapter extends BaseAdapter
     implements AbsListView.RecyclerListener,
@@ -35,6 +36,8 @@ public class ThumbAdapter extends BaseAdapter
         this.file = file;
         this.width = width;
         this.height = height;
+
+        renderers = new HashMap<Integer, AsyncRender>();
     }
 
     /*
@@ -59,12 +62,18 @@ public class ThumbAdapter extends BaseAdapter
         return position;
     }
 
+    // Cache of renderers, indexed by page number.  Android tends to
+    // call getView for the same page several times with different
+    // Views, so this ensures we only create one renderer per page.
+    private HashMap<Integer, AsyncRender> renderers;
+
     private static class ViewMeta
     {
         int page;
         ImageView imageView;
         TextView labelView;
         AsyncRender render;
+        AsyncRender.Callback callback;
     }
 
     @Override
@@ -102,22 +111,31 @@ public class ThumbAdapter extends BaseAdapter
         // the aspect ratio
         meta.imageView.setMinimumWidth(width);
         meta.imageView.setMinimumHeight(height);
-        // XXX The order these load in is really annoying, but maybe
-        // caching will make that irrelevant
-        meta.render = new AsyncRender(file, position, width, height) {
-                protected void onPostExecute(Bitmap result)
+
+        AsyncRender r;
+        if (renderers.containsKey(page)) {
+            // We already have a renderer for this page
+            Log.d(TAG, "Using existing renderer for " + page);
+            r = renderers.get(page);
+        } else {
+            // Start a new renderer
+            Log.d(TAG, "Starting renderer for " + page);
+            // XXX The order these load in is really annoying, but maybe
+            // caching will make that irrelevant
+            r = new AsyncRender(file, position, width, height);
+            r.execute();
+            renderers.put(page, r);
+        }
+
+        meta.render = r;
+        meta.callback = new AsyncRender.Callback() {
+                public void onImageReady(Bitmap img)
                 {
-                    if (result == null)
-                        Toast.makeText(context, "Failed to render page " + page,
-                                       Toast.LENGTH_SHORT).show();
-                    else if (meta.page == page) {
-                        // We check the page in case the view was recycled
-                        meta.imageView.setImageBitmap(result);
-                        meta.render = null;
-                    }
+                    meta.imageView.setImageBitmap(img);
+                    meta.callback = null;
                 }
             };
-        meta.render.execute();
+        r.addCallback(meta.callback);
 
         return view;
     }
@@ -132,15 +150,21 @@ public class ThumbAdapter extends BaseAdapter
         ViewMeta meta = (ViewMeta)view.getTag();
         Log.d(TAG, "Scrapping page " + meta.page + " (" + view + ")");
 
+        // Stop the async renderer if we have one
+        if (meta.render != null) {
+            if (meta.callback != null)
+                meta.render.removeCallback(meta.callback);
+            if (!meta.render.hasCallbacks()) {
+                Log.d(TAG, "Stopping async render " + meta.page);
+                meta.render.cancel(true);
+                renderers.remove(meta.page);
+            }
+        }
+        meta.render = null;
+        meta.callback = null;
+
         // Mark this view as scrapped.
         meta.page = -1;
-
-        // Stop the async render
-        if (meta.render != null) {
-            Log.d(TAG, "Stopping async render");
-            meta.render.cancel(true);
-            meta.render = null;
-        }
 
         // We're going to replace the bitmap in this view, so there's
         // no point in keeping it around on the scrap heap.
