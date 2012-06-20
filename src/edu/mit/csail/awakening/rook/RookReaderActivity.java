@@ -44,8 +44,6 @@ public class RookReaderActivity extends Activity
     {
         super.onCreate(savedInstanceState);
 
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-
         setContentView(R.layout.main);
         views = (ViewAnimator)findViewById(R.id.views);
         pageView = (PageView)findViewById(R.id.page);
