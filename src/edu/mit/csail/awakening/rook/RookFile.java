@@ -88,6 +88,9 @@ public class RookFile
                 pageno++;
             }
         }
+
+        if (pages.size() == 0)
+            throw new IOException("Not a Rook file");
     }
 
     public int getNumPages()
