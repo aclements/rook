@@ -11,6 +11,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -48,6 +50,21 @@ public class RookReaderActivity extends Activity
         views = (ViewAnimator)findViewById(R.id.views);
         pageView = (PageView)findViewById(R.id.page);
         thumbs = (GridView)findViewById(R.id.thumbs);
+
+        ImageView openButton = (ImageView)findViewById(R.id.openButton);
+        openButton.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+               startOpenFile();
+            }
+        });
+
+        ImageView thumbsButton = (ImageView)findViewById(R.id.thumbsButton);
+        thumbsButton.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                thumbs.setSelection(pageView.getPage());
+                views.setDisplayedChild(1);
+            }
+        });
 
         // XXX Remember this as part of the display state
         views.setDisplayedChild(1);
