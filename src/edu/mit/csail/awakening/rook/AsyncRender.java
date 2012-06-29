@@ -83,6 +83,7 @@ class AsyncRender extends AsyncTask<Void, Void, Bitmap>
 
     protected void onPostExecute(Bitmap result)
     {
+        // XXX result will be null if there was a problem
         for (Callback cb : callbacks)
             cb.onImageReady(result);
         callbacks.clear();

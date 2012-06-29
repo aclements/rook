@@ -44,6 +44,13 @@ public class RookReaderActivity extends Activity
         pageView = (PageView)findViewById(R.id.page);
         thumbs = (GridView)findViewById(R.id.thumbs);
 
+        // XXX This side-bar takes away 48 pixels of critical
+        // horizontal space.  Maybe only show it on a middle tap?  For
+        // fast jumping, could always show a dragable scrollbar in a
+        // only a few pixels of space.  When dragging, it could
+        // temporarily show thumbnails at the side or even scroll the
+        // whole page (probably in A2 mode).
+
         ImageView openButton = (ImageView)findViewById(R.id.openButton);
         openButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
